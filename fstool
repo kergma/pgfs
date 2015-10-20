@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+use strict;
+use DBI;
+use Getopt::Long;
+use File::Basename;
+
+
+my $dbh;
+
+my $script=$0;
+
+print "script $script\n";
+
+my ($dbpm,$conf,$host,$port,$dbname,$username,$password);
+GetOptions (
+	'dbpm=s' => \$dbpm,
+	'conf=s' => \$conf,
+	'h|host=s' => \$host,
+	'p|port=s' => \$port,
+	'd|dbname=s' => \$dbname,
+	'U|username=s' => \$username,
+	'P|passwork=s' => \$password,
+);
+
