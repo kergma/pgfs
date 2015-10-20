@@ -7,10 +7,6 @@ use File::Basename;
 
 my $dbh;
 
-my $script=$0;
-
-print "script $script\n";
-
 my ($dbpm,$conf,$host,$port,$dbname,$username,$password);
 GetOptions (
 	'dbpm=s' => \$dbpm,
@@ -19,6 +15,33 @@ GetOptions (
 	'p|port=s' => \$port,
 	'd|dbname=s' => \$dbname,
 	'U|username=s' => \$username,
-	'P|passwork=s' => \$password,
+	'P|password=s' => \$password,
 );
 
+if ($conf)
+{
+	use Config::Any;
+
+	my $c=Config::Any->load_files({files=>[glob $conf],use_ext=>0});
+	use Data::Dumper;
+	$c={map {%$_} map {values %{$_}} @$c};
+	$host=$c->{host}||$c->{dbhost} unless $host;
+	$port=$c->{port}||$c->{dbport} unless $port;
+	$dbname=$c->{dbname} unless $dbname;
+	$username=$c->{username}||$c->{dbuser}||$c->{dbusername} unless $username;
+	$password=$c->{password}||$c->{dbpass} unless $password;
+
+};
+
+if ($dbpm)
+{
+	push @INC, $dbpm;
+	require db;
+	db::connect($dbname) if $dbname;
+	db::connect() unless $dbname;
+	$dbh=$db::dbh;
+};
+
+$dbh=DBI->connect("dbi:Pg:;host=$host;dbname=$dbname",$username,$password) unless $dbh;
+
+print "could not connect database\n" and exit unless $dbh;
